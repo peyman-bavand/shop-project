@@ -35,3 +35,31 @@ export interface BookDetail extends Omit<BookList, 'main_image'> {
   is_active: boolean;
   created_at: string;
 }
+
+export interface AuthUser {
+  id: number;
+  phone_number: string;
+  is_phone_verified: boolean;
+}
+
+export interface CartProduct {
+  bookId: number;
+  slug: string;
+  title: string;
+  author: string;
+  price: number | string;
+  stock: number;
+  image: string | null;
+}
+
+export interface CartItem {
+  id: number;
+  bookId: number;
+  title: string;
+  slug: string;
+  author: string;
+  image: string | null;
+  price: string | number;
+  quantity: number;
+  stock: number;
+}

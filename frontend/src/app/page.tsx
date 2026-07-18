@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { BookList } from "@/types";
 
@@ -61,9 +62,7 @@ export default async function HomePage() {
           کتاب‌های انتشارات ما
         </h1>
 
-        <p className="mt-2 text-gray-500">
-          جدیدترین آثار منتشرشده
-        </p>
+        <p className="mt-2 text-gray-500">جدیدترین آثار منتشرشده</p>
       </header>
 
       {books.length === 0 ? (
@@ -80,12 +79,14 @@ export default async function HomePage() {
                 key={book.id}
                 className="flex h-full flex-col overflow-hidden rounded-lg border bg-white shadow-sm transition-shadow hover:shadow-md"
               >
-                <div className="flex aspect-[2/3] w-full items-center justify-center bg-gray-100 p-4">
+                <div className="relative flex aspect-[2/3] w-full items-center justify-center bg-gray-100 p-4">
                   {imageUrl ? (
-                    <img
+                    <Image
                       src={imageUrl}
                       alt={`تصویر جلد ${book.title}`}
-                      className="h-full w-full object-contain"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      className="object-contain p-4"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-gray-400">
@@ -93,7 +94,6 @@ export default async function HomePage() {
                     </div>
                   )}
                 </div>
-
 
                 <div className="flex flex-grow flex-col p-4">
                   <h2 className="mb-1 line-clamp-1 text-lg font-semibold text-gray-900">

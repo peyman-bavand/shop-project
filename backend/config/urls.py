@@ -19,6 +19,8 @@ from django.urls import path, include
 from django.http import JsonResponse
 from django.conf import settings
 from django.conf.urls.static import static
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+
 
 
 def health_check(request):
@@ -31,6 +33,23 @@ urlpatterns = [
     path('api/', include('books.urls')),  # مسیر APIها با پیشوند api/
     path("api/auth/", include("users.urls")),
     path("api/", include("books.urls")),
+
+    # ==========================================
+    # مسیرهای مربوط به Swagger و مستندات
+    # ==========================================
+    # 1. مسیر تولید فایل خام OpenAPI (به صورت JSON یا YAML)
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    
+    # 2. رابط کاربری Swagger UI (بسیار محبوب و تعاملی برای تست APIها)
+    path('api/docs/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    
+    # 3. رابط کاربری Redoc (بسیار تمیز برای خواندن مستندات)
+    path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
+    path("api/books/", include("books.urls")),
+    path("api/cart/", include("cart.urls")),
+    path("api/orders/", include("orders.urls")),
+    path("api/payments/", include("payments.urls")),
 ]
 
 # حتماً این بخش را برای لوکال در انتهای فایل قرار بده تا داکر بتواند تصاویر رسانه (Media) را سرو کند:

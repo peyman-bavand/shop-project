@@ -1,19 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
 import type { FormEvent } from "react";
 import type { BookComment } from "@/types";
+import { useAuth } from "@/components/ShopProvider";
 
 const API_URL = "http://localhost:8000";
-const ACCESS_TOKEN_KEY = "shop_access_token";
-const REFRESH_TOKEN_KEY = "shop_refresh_token";
 
 interface CommentSectionProps {
   slug: string;
   initialComments: BookComment[];
 }
-
-type LoginStep = "phone" | "code";
 
 function formatDate(date: string): string {
   return new Intl.DateTimeFormat("fa-IR", {
@@ -38,77 +36,11 @@ export default function CommentSection({
   slug,
   initialComments,
 }: CommentSectionProps) {
+  const { accessToken, user, isAuthReady, logOut } = useAuth();
   const [comments, setComments] = useState(initialComments);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [loginStep, setLoginStep] = useState<LoginStep>("phone");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [code, setCode] = useState("");
   const [commentText, setCommentText] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    setAccessToken(localStorage.getItem(ACCESS_TOKEN_KEY));
-  }, []);
-
-  async function requestOtp(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsSubmitting(true);
-    setMessage("");
-
-    try {
-      const response = await fetch(`${API_URL}/api/auth/request-otp/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone_number: phoneNumber }),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(getErrorMessage(data, "ارسال کد ورود ناموفق بود."));
-      }
-
-      setLoginStep("code");
-      setMessage("کد ورود برای شما ارسال شد.");
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "ارسال کد ورود ناموفق بود.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  async function verifyOtp(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsSubmitting(true);
-    setMessage("");
-
-    try {
-      const response = await fetch(`${API_URL}/api/auth/verify-otp/`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone_number: phoneNumber, code }),
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(getErrorMessage(data, "کد ورود معتبر نیست."));
-      }
-
-      localStorage.setItem(ACCESS_TOKEN_KEY, data.access);
-      localStorage.setItem(REFRESH_TOKEN_KEY, data.refresh);
-      setAccessToken(data.access);
-      setCode("");
-      setMessage("با موفقیت وارد شدید.");
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "کد ورود معتبر نیست.",
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
 
   async function submitComment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -132,9 +64,7 @@ export default function CommentSection({
       const data = await response.json();
 
       if (response.status === 401) {
-        localStorage.removeItem(ACCESS_TOKEN_KEY);
-        localStorage.removeItem(REFRESH_TOKEN_KEY);
-        setAccessToken(null);
+        logOut();
         throw new Error("نشست شما منقضی شده است؛ دوباره وارد شوید.");
       }
 
@@ -154,14 +84,6 @@ export default function CommentSection({
     }
   }
 
-  function logOut() {
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-    setAccessToken(null);
-    setLoginStep("phone");
-    setMessage("از حساب کاربری خارج شدید.");
-  }
-
   return (
     <section className="mt-8 rounded-xl border bg-white p-6 shadow-sm">
       <div className="mb-6 flex items-center justify-between gap-4 border-b pb-4">
@@ -172,18 +94,18 @@ export default function CommentSection({
           </p>
         </div>
 
-        {accessToken && (
-          <button
-            type="button"
-            onClick={logOut}
-            className="text-sm font-semibold text-gray-500 hover:text-rose-600"
-          >
-            خروج از حساب
-          </button>
+        {user && (
+          <span className="text-sm text-gray-500" dir="ltr">
+            {user.phone_number}
+          </span>
         )}
       </div>
 
-      {accessToken ? (
+      {!isAuthReady ? (
+        <div className="mb-8 rounded-lg bg-gray-50 p-4 text-sm text-gray-500">
+          در حال بررسی حساب کاربری...
+        </div>
+      ) : accessToken ? (
         <form onSubmit={submitComment} className="mb-8 rounded-lg bg-gray-50 p-4">
           <label
             htmlFor="comment"
@@ -222,60 +144,12 @@ export default function CommentSection({
           <p className="mt-1 text-sm text-gray-600">
             ورود با شماره موبایل و کد یک‌بارمصرف انجام می‌شود.
           </p>
-
-          {loginStep === "phone" ? (
-            <form onSubmit={requestOtp} className="mt-4 flex flex-wrap gap-3">
-              <input
-                type="tel"
-                inputMode="numeric"
-                value={phoneNumber}
-                onChange={(event) => setPhoneNumber(event.target.value)}
-                required
-                pattern="09[0-9]{9}"
-                placeholder="۰۹۱۲۱۲۳۴۵۶۷"
-                aria-label="شماره موبایل"
-                className="min-w-56 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-left text-gray-900 outline-none focus:border-indigo-500"
-                dir="ltr"
-              />
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="rounded-lg bg-indigo-600 px-5 py-2 font-semibold text-white hover:bg-indigo-700 disabled:bg-gray-400"
-              >
-                {isSubmitting ? "در حال ارسال..." : "دریافت کد ورود"}
-              </button>
-            </form>
-          ) : (
-            <form onSubmit={verifyOtp} className="mt-4 flex flex-wrap gap-3">
-              <input
-                type="text"
-                inputMode="numeric"
-                value={code}
-                onChange={(event) => setCode(event.target.value)}
-                required
-                pattern="[0-9]{6}"
-                maxLength={6}
-                placeholder="کد ۶ رقمی"
-                aria-label="کد ورود"
-                className="min-w-44 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-left text-gray-900 outline-none focus:border-indigo-500"
-                dir="ltr"
-              />
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="rounded-lg bg-indigo-600 px-5 py-2 font-semibold text-white hover:bg-indigo-700 disabled:bg-gray-400"
-              >
-                {isSubmitting ? "در حال بررسی..." : "ورود"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setLoginStep("phone")}
-                className="px-2 text-sm font-semibold text-indigo-700"
-              >
-                تغییر شماره
-              </button>
-            </form>
-          )}
+          <Link
+            href={`/login?next=${encodeURIComponent(`/books/${slug}`)}`}
+            className="mt-4 inline-block rounded-lg bg-indigo-600 px-5 py-2 font-semibold text-white hover:bg-indigo-700"
+          >
+            ورود برای ثبت دیدگاه
+          </Link>
         </div>
       )}
 

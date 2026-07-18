@@ -5,3 +5,6 @@ django-cors-headers>=4.4,<5.0
 python-decouple>=3.8,<4.0
 Pillow>=10.0.0
 djangorestframework-simplejwt
+drf-spectacular
+boto3>=1.34.0
+django-storages>=1.14.0

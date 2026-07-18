@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -46,9 +46,15 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework_simplejwt',
+    'drf_spectacular',
+    'storages',
 
     'books',
     'users',
+    'cart',
+    'orders',
+    #'invoices',
+    'payments',
 ]
 
 
@@ -146,7 +152,8 @@ CORS_ALLOWED_ORIGINS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 SIMPLE_JWT = {
@@ -166,3 +173,65 @@ SIMPLE_JWT = {
 }
 
 
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'فروشگاه کتاب API',
+    'DESCRIPTION': 'مستندات API برای پروژه فروشگاه کتاب ',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False, # این باعث می‌شود خود APIِ تولیدِ اسکیما در لیست دیده نشود و لیست تمیزتر بماند
+}
+
+
+
+# -------------------------------------------------------
+# --- تنظیمات MinIO (S3) -------------------------------
+AWS_ACCESS_KEY_ID = 'minioadmin'
+AWS_SECRET_ACCESS_KEY = 'minioadmin'
+AWS_STORAGE_BUCKET_NAME = 'shop-media'
+
+# جنگو از داخل شبکه داکر با این آدرس به MinIO وصل می‌شود
+AWS_S3_ENDPOINT_URL = 'http://minio:9000'
+
+# این بخش بسیار مهم است! 
+# به جنگو می‌گوید وقتی URL عکس را به فرانت‌اند می‌دهی، آدرس لوکال‌هاست بده تا مرورگر کاربر بتواند آن را پیدا کند.
+AWS_S3_CUSTOM_DOMAIN = f"minio:9000/{AWS_STORAGE_BUCKET_NAME}"
+
+AWS_S3_URL_PROTOCOL = "http:"
+
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+AWS_QUERYSTRING_AUTH = False # خاموش کردن امضای URL تا لینک‌ها عمومی باشند
+
+
+# به جنگو می‌گوییم برای فایل‌های مدیا از S3 استفاده کند
+# (در جنگو 4.2 به بعد از قالب دیکشنری STORAGES استفاده می‌شود)
+# به جنگو می‌گوییم فایل‌های آپلودی (default) را در S3 (MinIO) ذخیره کند
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# اگر از جنگو زیر 4.2 استفاده می‌کنی به جای STORAGES بالا، این خط را بنویس:
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+
+# settings.py
+
+# ... سایر تنظیمات ...
+
+
+# مطمئن شوید که Endpoint شما هم دقیقاً با http شروع می‌شود (اگر این متغیر را دارید)
+# AWS_S3_ENDPOINT_URL = 'http://minio:9000' 
+
+# # تنظیم دامین سفارشی که قبلا داشتید هم درست است، فقط مطمئن شوید این شکلی است:
+# AWS_S3_CUSTOM_DOMAIN = f'127.0.0.1:9000/{AWS_STORAGE_BUCKET_NAME}'
+
+
+
+
+PAYMENT_GATEWAY = "payments.gateways.fake.FakePaymentGateway"
+
+FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:3000")

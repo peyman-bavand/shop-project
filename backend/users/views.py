@@ -1,7 +1,8 @@
 from datetime import timedelta
 
 from django.utils import timezone
-from rest_framework import status
+from drf_spectacular.utils import OpenApiResponse, extend_schema, inline_serializer
+from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,6 +17,26 @@ from .utils import generate_otp
 class RequestOTPView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        summary="Request OTP code",
+        description=(
+            "Generates a one-time verification code and sends it "
+            "to the provided phone number."
+        ),
+        request=RequestOTPSerializer,
+        responses={
+            200: inline_serializer(
+                name="RequestOTPResponse",
+                fields={
+                    "detail": serializers.CharField(),
+                },
+            ),
+            400: OpenApiResponse(
+                description="Invalid phone number or request data.",
+            ),
+        },
+        tags=["Authentication"],
+    )
     def post(self, request):
         serializer = RequestOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -31,7 +52,10 @@ class RequestOTPView(APIView):
             expires_at=expires_at,
         )
 
-        send_sms(phone_number, f"Your verification code is: {code}")
+        send_sms(
+            phone_number,
+            f"Your verification code is: {code}",
+        )
 
         return Response(
             {"detail": "OTP sent successfully."},
@@ -42,6 +66,35 @@ class RequestOTPView(APIView):
 class VerifyOTPView(APIView):
     permission_classes = [AllowAny]
 
+    @extend_schema(
+        summary="Verify OTP code",
+        description=(
+            "Verifies the one-time code and returns JWT access "
+            "and refresh tokens."
+        ),
+        request=VerifyOTPSerializer,
+        responses={
+            200: inline_serializer(
+                name="VerifyOTPResponse",
+                fields={
+                    "refresh": serializers.CharField(),
+                    "access": serializers.CharField(),
+                    "user": inline_serializer(
+                        name="AuthenticatedUserResponse",
+                        fields={
+                            "id": serializers.IntegerField(),
+                            "phone_number": serializers.CharField(),
+                            "is_phone_verified": serializers.BooleanField(),
+                        },
+                    ),
+                },
+            ),
+            400: OpenApiResponse(
+                description="The OTP code is invalid or has expired.",
+            ),
+        },
+        tags=["Authentication"],
+    )
     def post(self, request):
         serializer = VerifyOTPSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

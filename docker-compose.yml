@@ -13,12 +13,44 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: shop_minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000" # پورت API
+      - "9001:9001" # پورت پنل مدیریت (کنسول)
+    environment:
+      MINIO_ROOT_USER: "minioadmin"
+      MINIO_ROOT_PASSWORD: "minioadmin"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio-setup:
+    image: minio/mc:latest
+    container_name: shop_minio_setup
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb myminio/shop-media --ignore-existing;
+      /usr/bin/mc anonymous set download myminio/shop-media;
+      exit 0;
+      "
 
   backend:
     build:
@@ -35,13 +67,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
+      minio:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health/')\""]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
+    environment:
+    - FRONTEND_BASE_URL=http://localhost:3000
+
 
   frontend:
     build:
@@ -52,12 +88,34 @@ services:
       - .env
     ports:
       - "3000:3000"
+
     volumes:
       - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
+      
     depends_on:
       backend:
         condition: service_healthy
+  
+  storybook:
+    build:
+      context: ./frontend
+    command: npm run storybook -- --host 0.0.0.0
+    ports:
+      - "6006:6006"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+      WATCHPACK_POLLING: "true"
 
 
 volumes:
   postgres_data:
+  minio_data:

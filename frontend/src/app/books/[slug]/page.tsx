@@ -1,7 +1,9 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import type { BookDetail } from '@/types';
-import CommentSection from './CommentSection';
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import type { BookDetail } from "@/types";
+import CommentSection from "./CommentSection";
+import AddToCartButton from "@/components/AddToCartButton";
 
 const INTERNAL_API_URL = "http://backend:8000";
 const PUBLIC_BACKEND_URL = "http://localhost:8000";
@@ -9,7 +11,7 @@ const PUBLIC_BACKEND_URL = "http://localhost:8000";
 async function getBookDetail(slug: string): Promise<BookDetail | null> {
   try {
     const res = await fetch(`${INTERNAL_API_URL}/api/books/${slug}/`, {
-      cache: 'no-store',
+      cache: "no-store",
     });
 
     if (res.status === 404) {
@@ -20,7 +22,7 @@ async function getBookDetail(slug: string): Promise<BookDetail | null> {
     if (!res.ok) {
       const errorText = await res.text();
       console.error(`[GET_BOOK_DETAIL] API error: ${res.status} - ${errorText}`);
-      throw new Error('خطا در دریافت اطلاعات کتاب');
+      throw new Error("خطا در دریافت اطلاعات کتاب");
     }
 
     return res.json();
@@ -42,9 +44,9 @@ function getPublicImageUrl(imageUrl: string | null | undefined): string | null {
 }
 
 function formatPrice(price: number | string): string {
-  const numericPrice = typeof price === 'number' ? price : Number(price);
+  const numericPrice = typeof price === "number" ? price : Number(price);
   if (isNaN(numericPrice)) return String(price);
-  return numericPrice.toLocaleString('fa-IR');
+  return numericPrice.toLocaleString("fa-IR");
 }
 
 interface Props {
@@ -63,36 +65,39 @@ export default async function BookDetailPage({ params }: Props) {
     notFound();
   }
 
-  let book: BookDetail | null = null;
-  try {
-    book = await getBookDetail(slug);
-  } catch (e) {
-    console.error("[BOOK_DETAIL_PAGE] Error fetching book data, routing to notFound", e);
-    notFound();
-  }
+  const book = await getBookDetail(slug);
 
   if (!book) {
     notFound();
   }
 
-  const rawMainImage = book.images?.find(img => img.is_main)?.image || book.images?.[0]?.image;
+  const rawMainImage =
+    book.images?.find((img) => img.is_main)?.image || book.images?.[0]?.image;
   const mainImage = getPublicImageUrl(rawMainImage);
+  console.log("[BOOK_DETAIL_PAGE] rawMainImage:", rawMainImage);
+  console.log("[BOOK_DETAIL_PAGE] mainImage:", mainImage);
+  
 
   return (
     <main className="container mx-auto px-4 py-8" dir="rtl">
-      <Link href="/" className="text-indigo-600 hover:text-indigo-800 text-sm mb-6 inline-block font-semibold">
+      <Link
+        href="/"
+        className="mb-6 inline-block text-sm font-semibold text-indigo-600 hover:text-indigo-800"
+      >
         ← بازگشت به لیست کتاب‌ها
       </Link>
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 bg-white p-6 rounded-xl border shadow-sm">
+      <div className="grid grid-cols-1 gap-8 rounded-xl border bg-white p-6 shadow-sm md:grid-cols-12">
         {/* تصویر جلد */}
-        <div className="md:col-span-4 flex flex-col gap-4">
-          <div className="flex aspect-[2/3] w-full items-center justify-center bg-gray-50 border rounded-lg overflow-hidden p-4">
+        <div className="flex flex-col gap-4 md:col-span-4">
+          <div className="relative flex aspect-[2/3] w-full items-center justify-center overflow-hidden rounded-lg border bg-gray-50 p-4">
             {mainImage ? (
-              <img
+              <Image
                 src={mainImage}
                 alt={book.title}
-                className="h-full w-full object-contain"
+                fill
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="object-contain p-4"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-gray-400">
@@ -100,7 +105,7 @@ export default async function BookDetailPage({ params }: Props) {
               </div>
             )}
           </div>
-          
+
           {/* گالری تصاویر کوچک */}
           {book.images && book.images.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
@@ -108,11 +113,16 @@ export default async function BookDetailPage({ params }: Props) {
                 const thumbUrl = getPublicImageUrl(img.image);
                 if (!thumbUrl) return null;
                 return (
-                  <div key={img.id} className="flex aspect-[2/3] border rounded overflow-hidden bg-gray-50 p-1 items-center justify-center">
-                    <img
+                  <div
+                    key={img.id}
+                    className="relative flex aspect-[2/3] items-center justify-center overflow-hidden rounded border bg-gray-50 p-1"
+                  >
+                    <Image
                       src={thumbUrl}
                       alt="تصویر جانبی کتاب"
-                      className="h-full w-full object-contain"
+                      fill
+                      sizes="25vw"
+                      className="object-contain p-1"
                     />
                   </div>
                 );
@@ -124,52 +134,94 @@ export default async function BookDetailPage({ params }: Props) {
         {/* اطلاعات کتاب */}
         <div className="md:col-span-8 flex flex-col justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">{book.title}</h1>
-            
-            <div className="space-y-2 mb-6">
-              <p className="text-lg text-gray-700">نویسنده: <span className="font-semibold text-gray-950">{book.author}</span></p>
+            <h1 className="mb-4 text-3xl font-bold text-gray-900">
+              {book.title}
+            </h1>
+
+            <div className="mb-6 space-y-2">
+              <p className="text-lg text-gray-700">
+                نویسنده: <span className="font-semibold text-gray-950">{book.author}</span>
+              </p>
               {book.translator && (
-                <p className="text-md text-gray-600">مترجم: <span className="font-semibold text-gray-950">{book.translator}</span></p>
+                <p className="text-md text-gray-600">
+                  مترجم:{" "}
+                  <span className="font-semibold text-gray-950">
+                    {book.translator}
+                  </span>
+                </p>
               )}
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 my-6 p-4 bg-gray-50 rounded-lg text-sm text-gray-600">
-              <div>شابک: <span className="font-semibold text-gray-900">{book.isbn || 'ثبت نشده'}</span></div>
-              <div>تعداد صفحات: <span className="font-semibold text-gray-900">{book.number_of_pages || 'ثبت نشده'}</span></div>
-              <div>سال انتشار: <span className="font-semibold text-gray-900">{book.publish_year || 'ثبت نشده'}</span></div>
-              <div>نوع جلد: <span className="font-semibold text-gray-900">{
-                book.cover_type === 'hardback' ? 'گالینگور' : 
-                book.cover_type === 'pocket' ? 'جیبی' : 'شومیز'
-              }</span></div>
-              <div>وضعیت انبار: <span className={`font-semibold ${book.stock > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                {book.stock > 0 ? `موجود (${book.stock} عدد)` : 'ناموجود'}
-              </span></div>
+            <div className="my-6 grid grid-cols-2 gap-4 rounded-lg bg-gray-50 p-4 text-sm text-gray-600 sm:grid-cols-3">
+              <div>
+                شابک:{" "}
+                <span className="font-semibold text-gray-900">
+                  {book.isbn || "ثبت نشده"}
+                </span>
+              </div>
+              <div>
+                تعداد صفحات:{" "}
+                <span className="font-semibold text-gray-900">
+                  {book.number_of_pages || "ثبت نشده"}
+                </span>
+              </div>
+              <div>
+                سال انتشار:{" "}
+                <span className="font-semibold text-gray-900">
+                  {book.publish_year || "ثبت نشده"}
+                </span>
+              </div>
+              <div>
+                نوع جلد:{" "}
+                <span className="font-semibold text-gray-900">
+                  {book.cover_type === "hardback"
+                    ? "گالینگور"
+                    : book.cover_type === "pocket"
+                      ? "جیبی"
+                      : "شومیز"}
+                </span>
+              </div>
+              <div>
+                وضعیت انبار:{" "}
+                <span
+                  className={`font-semibold ${book.stock > 0 ? "text-emerald-600" : "text-rose-600"}`}
+                >
+                  {book.stock > 0 ? `موجود (${book.stock} عدد)` : "ناموجود"}
+                </span>
+              </div>
             </div>
 
-            <div className="prose max-w-none text-gray-700 leading-relaxed mb-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-2 border-b pb-2">درباره کتاب:</h3>
-              <p className="whitespace-pre-line">{book.description || 'توضیحاتی برای این کتاب ثبت نشده است.'}</p>
+            <div className="prose mb-6 max-w-none leading-relaxed text-gray-700">
+              <h3 className="mb-2 border-b pb-2 text-lg font-bold text-gray-900">
+                درباره کتاب:
+              </h3>
+              <p className="whitespace-pre-line">
+                {book.description || "توضیحاتی برای این کتاب ثبت نشده است."}
+              </p>
             </div>
           </div>
 
-          <div className="border-t pt-6 flex items-center justify-between">
+          <div className="flex items-center justify-between border-t pt-6">
             <div>
-              <span className="text-xs text-gray-500 block mb-1">قیمت نهایی</span>
+              <span className="mb-1 block text-xs text-gray-500">
+                قیمت نهایی
+              </span>
               <span className="text-2xl font-bold text-emerald-600">
                 {formatPrice(book.price)} تومان
               </span>
             </div>
 
-            <button 
-              disabled={book.stock === 0}
-              className={`px-8 py-3 rounded-lg font-bold text-white transition-colors ${
-                book.stock > 0 
-                  ? 'bg-indigo-600 hover:bg-indigo-700 shadow-sm' 
-                  : 'bg-gray-400 cursor-not-allowed'
-              }`}
-            >
-              {book.stock > 0 ? 'افزودن به سبد خرید' : 'ناموجود'}
-            </button>
+            <AddToCartButton
+              product={{
+                bookId: book.id,
+                slug: book.slug,
+                title: book.title,
+                author: book.author,
+                price: book.price,
+                stock: book.stock,
+                image: mainImage,
+              }}
+            />
           </div>
         </div>
       </div>

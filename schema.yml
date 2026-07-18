@@ -1,0 +1,1140 @@
+openapi: 3.0.3
+info:
+  title: فروشگاه کتاب API
+  version: 1.0.0
+  description: 'مستندات API برای پروژه فروشگاه کتاب '
+paths:
+  /api/auth/request-otp/:
+    post:
+      operationId: auth_request_otp_create
+      description: Generates a one-time verification code and sends it to the provided
+        phone number.
+      summary: Request OTP code
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestOTP'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RequestOTP'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RequestOTP'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestOTPResponse'
+          description: ''
+        '400':
+          description: Invalid phone number or request data.
+  /api/auth/verify-otp/:
+    post:
+      operationId: auth_verify_otp_create
+      description: Verifies the one-time code and returns JWT access and refresh tokens.
+      summary: Verify OTP code
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOTP'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyOTP'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyOTP'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyOTPResponse'
+          description: ''
+        '400':
+          description: The OTP code is invalid or has expired.
+  /api/books/:
+    get:
+      operationId: books_list
+      description: |-
+        API ViewSet برای مشاهده لیست و جزئیات کتاب‌ها.
+        فقط درخواست‌های GET مجاز هستند.
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookList'
+          description: ''
+  /api/books/{slug}/:
+    get:
+      operationId: books_retrieve
+      description: |-
+        API ViewSet برای مشاهده لیست و جزئیات کتاب‌ها.
+        فقط درخواست‌های GET مجاز هستند.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+          title: اسلاگ
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDetail'
+          description: ''
+  /api/books/{slug}/comments/:
+    get:
+      operationId: books_comments_retrieve
+      description: |-
+        API ViewSet برای مشاهده لیست و جزئیات کتاب‌ها.
+        فقط درخواست‌های GET مجاز هستند.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+          title: اسلاگ
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookComment'
+          description: ''
+    post:
+      operationId: books_comments_create
+      description: |-
+        API ViewSet برای مشاهده لیست و جزئیات کتاب‌ها.
+        فقط درخواست‌های GET مجاز هستند.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+          title: اسلاگ
+        required: true
+      tags:
+      - books
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookComment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookComment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookComment'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookComment'
+          description: ''
+  /api/books/books/:
+    get:
+      operationId: books_books_list
+      description: |-
+        API ViewSet برای مشاهده لیست و جزئیات کتاب‌ها.
+        فقط درخواست‌های GET مجاز هستند.
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookList'
+          description: ''
+  /api/books/books/{slug}/:
+    get:
+      operationId: books_books_retrieve
+      description: |-
+        API ViewSet برای مشاهده لیست و جزئیات کتاب‌ها.
+        فقط درخواست‌های GET مجاز هستند.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+          title: اسلاگ
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookDetail'
+          description: ''
+  /api/books/books/{slug}/comments/:
+    get:
+      operationId: books_books_comments_retrieve
+      description: |-
+        API ViewSet برای مشاهده لیست و جزئیات کتاب‌ها.
+        فقط درخواست‌های GET مجاز هستند.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+          title: اسلاگ
+        required: true
+      tags:
+      - books
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookComment'
+          description: ''
+    post:
+      operationId: books_books_comments_create
+      description: |-
+        API ViewSet برای مشاهده لیست و جزئیات کتاب‌ها.
+        فقط درخواست‌های GET مجاز هستند.
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+          title: اسلاگ
+        required: true
+      tags:
+      - books
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookComment'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookComment'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookComment'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookComment'
+          description: ''
+  /api/cart/:
+    get:
+      operationId: cart_retrieve
+      description: سبد خرید کاربر احراز هویت‌شده را همراه با اقلام، تعداد کل و مبلغ
+        کل برمی‌گرداند. اگر کاربر هنوز سبد خرید نداشته باشد، یک سبد خالی برای او ایجاد
+        می‌شود.
+      summary: دریافت سبد خرید
+      tags:
+      - Cart
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: سبد خرید با موفقیت دریافت شد.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartError'
+          description: اطلاعات احراز هویت ارسال نشده یا نامعتبر است.
+  /api/cart/clear/:
+    post:
+      operationId: cart_clear
+      description: تمام اقلام سبد خرید کاربر را حذف می‌کند و سبد خرید خالی را برمی‌گرداند.
+      summary: پاک‌کردن تمام اقلام سبد خرید
+      tags:
+      - Cart
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: سبد خرید با موفقیت پاک شد.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartError'
+          description: اطلاعات احراز هویت ارسال نشده یا نامعتبر است.
+  /api/cart/items/:
+    post:
+      operationId: cart_item_add
+      description: کتاب موردنظر را به سبد خرید اضافه می‌کند. اگر کتاب از قبل در سبد
+        وجود داشته باشد، تعداد جدید به تعداد فعلی افزوده می‌شود. مجموع تعداد نمی‌تواند
+        بیشتر از موجودی کتاب باشد.
+      summary: افزودن کتاب به سبد خرید
+      tags:
+      - Cart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCartItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddCartItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AddCartItem'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: کتاب با موفقیت به سبد خرید اضافه شد.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartValidationError'
+              examples:
+                موجودیناکافی:
+                  value:
+                    quantity:
+                    - Requested quantity exceeds available stock.
+                  summary: موجودی ناکافی
+                تعدادنامعتبر:
+                  value:
+                    quantity:
+                    - Ensure this value is greater than or equal to 1.
+                  summary: تعداد نامعتبر
+          description: داده‌های ورودی نامعتبر یا موجودی ناکافی است.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartError'
+          description: اطلاعات احراز هویت ارسال نشده یا نامعتبر است.
+  /api/cart/items/{item_id}/:
+    patch:
+      operationId: cart_item_update
+      description: تعداد نهایی یک آیتم موجود در سبد خرید را تغییر می‌دهد. تعداد جدید
+        باید حداقل یک و حداکثر برابر موجودی کتاب باشد.
+      summary: تغییر تعداد یک آیتم سبد خرید
+      parameters:
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        description: شناسه آیتم موجود در سبد خرید.
+        required: true
+      tags:
+      - Cart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCartItem'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCartItem'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCartItem'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: تعداد آیتم با موفقیت تغییر کرد.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartValidationError'
+          description: تعداد واردشده نامعتبر یا بیشتر از موجودی است.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartError'
+          description: اطلاعات احراز هویت ارسال نشده یا نامعتبر است.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartError'
+              examples:
+                آیتمپیدانشد:
+                  value:
+                    detail: Item not found.
+                  summary: آیتم پیدا نشد
+          description: آیتم موردنظر در سبد خرید پیدا نشد.
+  /api/cart/items/{item_id}/delete/:
+    delete:
+      operationId: cart_item_delete
+      description: آیتم مشخص‌شده را از سبد خرید کاربر حذف می‌کند و نسخه به‌روزشده
+        سبد خرید را برمی‌گرداند.
+      summary: حذف یک آیتم از سبد خرید
+      parameters:
+      - in: path
+        name: item_id
+        schema:
+          type: integer
+        description: شناسه آیتم موجود در سبد خرید.
+        required: true
+      tags:
+      - Cart
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: آیتم حذف شد و سبد خرید به‌روزشده برگشت داده شد.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartError'
+          description: اطلاعات احراز هویت ارسال نشده یا نامعتبر است.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartError'
+              examples:
+                آیتمپیدانشد:
+                  value:
+                    detail: Item not found.
+                  summary: آیتم پیدا نشد
+          description: آیتم موردنظر در سبد خرید پیدا نشد.
+  /api/orders/checkout/:
+    post:
+      operationId: orders_checkout
+      description: |-
+        سبد خرید کاربر احراز هویت‌شده را اعتبارسنجی می‌کند و یک سفارش جدید با وضعیت `pending_payment` می‌سازد.
+
+        قیمت، موجودی و مبلغ نهایی سفارش فقط در بک‌اند بررسی و محاسبه می‌شوند. این endpoint بدنه درخواست ندارد و سبد خرید نیز پس از ایجاد سفارش پاک نمی‌شود.
+      summary: تبدیل سبد خرید به سفارش
+      tags:
+      - Orders
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+              examples:
+                سفارشایجادشده:
+                  value:
+                    id: 15
+                    user: 3
+                    status: pending_payment
+                    subtotal: '300000'
+                    discount_amount: '0'
+                    shipping_amount: '0'
+                    total_amount: '300000'
+                    created_at: '2026-07-18T10:30:00Z'
+                    updated_at: '2026-07-18T10:30:00Z'
+                    paid_at: null
+                    items:
+                    - id: 25
+                      book: 7
+                      product_title: نام کتاب
+                      unit_price: '150000'
+                      quantity: 2
+                      line_total: '300000'
+                  summary: سفارش ایجادشده
+          description: سفارش با موفقیت ایجاد شد.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckoutError'
+              examples:
+                سبدخریدوجودندارد:
+                  value:
+                    detail: سبد خریدی برای این کاربر وجود ندارد.
+                  summary: سبد خرید وجود ندارد
+                سبدخریدخالی:
+                  value:
+                    detail: سبد خرید خالی است.
+                  summary: سبد خرید خالی
+                موجودیناکافی:
+                  value:
+                    detail: برخی اقلام سبد خرید قابل سفارش نیستند.
+                    items:
+                    - book_id: 7
+                      title: نام کتاب
+                      requested_quantity: 3
+                      available_stock: 1
+                      detail: موجودی کتاب کافی نیست.
+                  summary: موجودی ناکافی
+                کتابغیرفعال:
+                  value:
+                    detail: برخی اقلام سبد خرید قابل سفارش نیستند.
+                    items:
+                    - book_id: 7
+                      title: نام کتاب
+                      detail: این کتاب در حال حاضر قابل خرید نیست.
+                  summary: کتاب غیرفعال
+                کتابپیدانشد:
+                  value:
+                    detail: برخی اقلام سبد خرید قابل سفارش نیستند.
+                    items:
+                    - book_id: 7
+                      detail: کتاب موردنظر پیدا نشد.
+                  summary: کتاب پیدا نشد
+                تعدادنامعتبر:
+                  value:
+                    detail: برخی اقلام سبد خرید قابل سفارش نیستند.
+                    items:
+                    - book_id: 7
+                      title: نام کتاب
+                      requested_quantity: 0
+                      detail: تعداد کتاب باید حداقل یک باشد.
+                  summary: تعداد نامعتبر
+          description: سبد خرید وجود ندارد، خالی است یا دارای اقلام غیرقابل سفارش
+            است.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                احرازهویتانجامنشده:
+                  value:
+                    detail: اطلاعات برای اعتبارسنجی هویت ارائه نشد.
+                  summary: احراز هویت انجام نشده
+          description: اطلاعات احراز هویت ارسال نشده یا نامعتبر است.
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                دسترسیغیرمجاز:
+                  value:
+                    detail: شما اجازه انجام این عملیات را ندارید.
+                  summary: دسترسی غیرمجاز
+          description: کاربر اجازه دسترسی به این endpoint را ندارد.
+components:
+  schemas:
+    AddCartItem:
+      type: object
+      properties:
+        book:
+          type: integer
+          description: شناسه کتابی که باید به سبد خرید اضافه شود.
+        quantity:
+          type: integer
+          minimum: 1
+          description: تعداد کتابی که باید به سبد خرید اضافه شود.
+      required:
+      - book
+      - quantity
+    AuthenticatedUserResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        phone_number:
+          type: string
+        is_phone_verified:
+          type: boolean
+      required:
+      - id
+      - is_phone_verified
+      - phone_number
+    BookComment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        author:
+          type: string
+          readOnly: true
+        text:
+          type: string
+          title: متن دیدگاه
+          maxLength: 1000
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: تاریخ ثبت
+      required:
+      - author
+      - created_at
+      - id
+      - text
+    BookDetail:
+      type: object
+      description: سریالایزر کامل برای نمایش جزئیات یک کتاب.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          title: عنوان کتاب
+          maxLength: 255
+        slug:
+          type: string
+          title: اسلاگ
+          pattern: ^[-\w]+$
+          maxLength: 50
+        author:
+          type: string
+          title: نویسنده / پدیدآورنده
+          maxLength: 255
+        translator:
+          type: string
+          nullable: true
+          title: مترجم
+          maxLength: 255
+        isbn:
+          type: string
+          title: شابک (ISBN)
+          maxLength: 13
+        number_of_pages:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: تعداد صفحات
+        publish_year:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: سال انتشار (شمسی)
+        cover_type:
+          allOf:
+          - $ref: '#/components/schemas/CoverTypeEnum'
+          title: نوع جلد
+        description:
+          type: string
+          title: خلاصه/توضیحات کتاب
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,0})?$
+          title: قیمت (تومان)
+        stock:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: موجودی انبار
+        is_active:
+          type: boolean
+          title: وضعیت انتشار در سایت
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookImage'
+          readOnly: true
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/BookComment'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: تاریخ ثبت
+      required:
+      - author
+      - comments
+      - created_at
+      - id
+      - images
+      - isbn
+      - number_of_pages
+      - price
+      - publish_year
+      - slug
+      - title
+    BookImage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        image:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+          title: تصویر جلد
+        is_main:
+          type: boolean
+          readOnly: true
+          title: تصویر اصلی جلد
+      required:
+      - id
+      - image
+      - is_main
+    BookList:
+      type: object
+      description: سریالایزر سبک برای نمایش کتاب‌ها در فهرست اصلی.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          title: عنوان کتاب
+          maxLength: 255
+        slug:
+          type: string
+          title: اسلاگ
+          pattern: ^[-\w]+$
+          maxLength: 50
+        author:
+          type: string
+          title: نویسنده / پدیدآورنده
+          maxLength: 255
+        translator:
+          type: string
+          nullable: true
+          title: مترجم
+          maxLength: 255
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,0})?$
+          title: قیمت (تومان)
+        stock:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: موجودی انبار
+        cover_type:
+          allOf:
+          - $ref: '#/components/schemas/CoverTypeEnum'
+          title: نوع جلد
+        main_image:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+      required:
+      - author
+      - id
+      - main_image
+      - price
+      - slug
+      - title
+    Cart:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+          readOnly: true
+        total_items:
+          type: integer
+          minimum: 0
+          readOnly: true
+        total_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+      required:
+      - id
+      - items
+      - total_items
+      - total_price
+    CartError:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: توضیح خطای رخ‌داده.
+      required:
+      - detail
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        book:
+          type: integer
+          readOnly: true
+        book_title:
+          type: string
+          readOnly: true
+        book_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        book_slug:
+          type: string
+          readOnly: true
+        book_author:
+          type: string
+          readOnly: true
+        book_image:
+          type: string
+          format: uri
+          nullable: true
+          readOnly: true
+        book_stock:
+          type: integer
+          readOnly: true
+        quantity:
+          type: integer
+          readOnly: true
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+      required:
+      - book
+      - book_author
+      - book_image
+      - book_price
+      - book_slug
+      - book_stock
+      - book_title
+      - id
+      - quantity
+      - subtotal
+    CartValidationError:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: توضیح کلی خطای اعتبارسنجی.
+        book:
+          type: array
+          items:
+            type: string
+          description: خطاهای مربوط به شناسه کتاب.
+        quantity:
+          type: array
+          items:
+            type: string
+          description: خطاهای مربوط به تعداد کتاب.
+        non_field_errors:
+          type: array
+          items:
+            type: string
+          description: خطاهای عمومی اعتبارسنجی.
+    CheckoutError:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: توضیح کلی خطای ثبت سفارش.
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CheckoutItemError'
+          description: فهرست آیتم‌هایی که مانع ثبت سفارش شده‌اند.
+      required:
+      - detail
+    CheckoutItemError:
+      type: object
+      properties:
+        book_id:
+          type: integer
+          minimum: 1
+          description: شناسه کتابی که در فرایند ثبت سفارش خطا ایجاد کرده است.
+        title:
+          type: string
+          description: عنوان کتاب.
+        requested_quantity:
+          type: integer
+          minimum: 1
+          description: تعداد درخواستی کتاب.
+        available_stock:
+          type: integer
+          minimum: 0
+          description: موجودی فعلی کتاب.
+        detail:
+          type: string
+          description: توضیح خطای مربوط به این آیتم.
+      required:
+      - book_id
+      - detail
+    CoverTypeEnum:
+      enum:
+      - hardback
+      - paperback
+      - pocket
+      type: string
+      description: |-
+        * `hardback` - گالینگور (جلد سخت)
+        * `paperback` - شومیز (جلد نرم)
+        * `pocket` - جیبی
+    Error:
+      type: object
+      properties:
+        detail:
+          type: string
+          description: توضیح خطای رخ‌داده.
+      required:
+      - detail
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+          title: کاربر
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+          title: وضعیت سفارش
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,0})?$
+          readOnly: true
+          title: جمع اقلام (تومان)
+        discount_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,0})?$
+          readOnly: true
+          title: مبلغ تخفیف (تومان)
+        shipping_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,0})?$
+          readOnly: true
+          title: هزینه ارسال (تومان)
+        total_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,0})?$
+          readOnly: true
+          title: مبلغ نهایی (تومان)
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: تاریخ ثبت
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: تاریخ بروزرسانی
+        paid_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: تاریخ پرداخت
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          readOnly: true
+      required:
+      - created_at
+      - discount_amount
+      - id
+      - items
+      - paid_at
+      - shipping_amount
+      - status
+      - subtotal
+      - total_amount
+      - updated_at
+      - user
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        book:
+          type: integer
+          readOnly: true
+          nullable: true
+          title: کتاب
+        product_title:
+          type: string
+          readOnly: true
+          title: عنوان کتاب هنگام سفارش
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,0})?$
+          readOnly: true
+          title: قیمت واحد هنگام سفارش (تومان)
+        quantity:
+          type: integer
+          readOnly: true
+          title: تعداد
+        line_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,0})?$
+          readOnly: true
+          title: جمع ردیف (تومان)
+      required:
+      - book
+      - id
+      - line_total
+      - product_title
+      - quantity
+      - unit_price
+    PatchedUpdateCartItem:
+      type: object
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+          description: تعداد نهایی این کتاب در سبد خرید.
+    RequestOTP:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          maxLength: 15
+      required:
+      - phone_number
+    RequestOTPResponse:
+      type: object
+      properties:
+        detail:
+          type: string
+      required:
+      - detail
+    StatusEnum:
+      enum:
+      - pending_payment
+      - paid
+      - processing
+      - shipped
+      - delivered
+      - canceled
+      - expired
+      type: string
+      description: |-
+        * `pending_payment` - در انتظار پرداخت
+        * `paid` - پرداخت‌شده
+        * `processing` - در حال پردازش
+        * `shipped` - ارسال‌شده
+        * `delivered` - تحویل‌شده
+        * `canceled` - لغوشده
+        * `expired` - منقضی‌شده
+    VerifyOTP:
+      type: object
+      properties:
+        phone_number:
+          type: string
+          maxLength: 15
+        code:
+          type: string
+          maxLength: 6
+      required:
+      - code
+      - phone_number
+    VerifyOTPResponse:
+      type: object
+      properties:
+        refresh:
+          type: string
+        access:
+          type: string
+        user:
+          $ref: '#/components/schemas/AuthenticatedUserResponse'
+      required:
+      - access
+      - refresh
+      - user
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
