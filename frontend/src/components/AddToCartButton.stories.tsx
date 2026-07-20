@@ -18,7 +18,7 @@ const sampleProduct = {
   author: "نویسنده نمونه",
   price: 120000,
   stock: 5,
-  image: "/placeholder.jpg",
+  image: "/placeholder.png",
 };
 
 export const Standalone: Story = {
@@ -49,6 +49,7 @@ export const InBookView: Story = {
     </div>
   ),
 };
+
 
 export const OutOfStockInBookView: Story = {
   render: () => {

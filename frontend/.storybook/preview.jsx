@@ -1,5 +1,18 @@
+import "../src/app/globals.css";
+import ShopProvider from "../src/components/ShopProvider";
+
 /** @type { import('@storybook/nextjs-vite').Preview } */
+
 const preview = {
+
+  decorators: [
+    (Story) => (
+      <ShopProvider>
+        <Story />
+      </ShopProvider>
+    ),
+  ],
+  
   parameters: {
     controls: {
       matchers: {
@@ -13,7 +26,12 @@ const preview = {
       // 'error' - fail CI on a11y violations
       // 'off' - skip a11y checks entirely
       test: "todo"
+    },
+
+    nextjs: {
+      appDirectory: true,
     }
+
   },
 };
 
